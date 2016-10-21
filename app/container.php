@@ -8,6 +8,8 @@ $container = new ContainerBuilder();
 
 $container->register('http', \GuzzleHttp\Client::class);
 
+$container->register('fs', \Symfony\Component\Filesystem\Filesystem::class);
+
 $container->register('console', Symfony\Component\Console\Application::class)
     ->addMethodCall('add', [new Reference('extract_photos_command')]);
 

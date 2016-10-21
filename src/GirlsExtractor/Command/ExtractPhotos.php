@@ -40,7 +40,13 @@ class ExtractPhotos extends Command
     {
         $io = new SymfonyStyle($input, $output);
 
+        /**
+         * @var $fs Filesystem
+         * @var $http \GuzzleHttp\Client
+         */
+
         $http = $this->container->get('http');
+        $fs = $this->container->get('fs');
 
         $url = $input->getArgument('url');
         $url = rtrim($url, '/');
@@ -53,6 +59,7 @@ class ExtractPhotos extends Command
             mkdir($destination, 0755, true);
         }
 
+        $fetched = [];
         $continue = true;
         while($continue) {
             $response = $http->get($archive);
@@ -96,36 +103,26 @@ class ExtractPhotos extends Command
                             preg_match('#tumblr_[A-Za-z0-9]*_[0-9]*\.[a-z]*#', $finalPhoto, $photoName);
                             $photoName = reset($photoName);
 
-                            /*  Brokes image, fix if you want;
-                                $resource = fopen($destination . '/' . $photoName, 'w');
-                                $download = $http->request('GET', $finalPhoto, ['sink' => $resource]);
-                            */
+                            #  Brokes image, fix if you want;
+                            #  $resource = fopen($destination . '/' . $photoName, 'w');
+                            #  $download = $http->request('GET', $finalPhoto, ['sink' => $resource]);
 
-                            file_put_contents($destination . '/' . $photoName, file_get_contents('http://' . $finalPhoto));
+                            $result = file_put_contents($destination . '/' . $photoName, file_get_contents('http://' . $finalPhoto));
+
+                            if($result) {
+                                $io->success('Downloaded ' . $photoName);
+                                $fetched[] = $post;
+                            } else {
+                                $io->error('Failed to download ' . $photoName);
+                            }
                         }
                     }
                 }
             }
         }
 
-
-
-//        $io->progressStart(count($keys));
-//
-//        foreach ($keys as $key) {
-//            $io->progressAdvance(1);
-//            $io->text('Searching for ' . $formatter->truncate($key, 75));
-//
-//            $io->newLine();
-//            $io->note('Found in ' . $unit->getRealPath());
-//        }
-//        $io->progressFinish();
-//        $io->success(['Translations found in code: ' . count($found), 'Status saved to var/found.php']);
-
-//        $found = array_unique($found);
-//        $content = var_export($found, true);
-//        $content = '<?php return ' . $content . ';';
-//        $fileSystem->dumpFile('var/found.php', $content);
-
+        $content = var_export($fetched, true);
+        $content = '<?php return ' . $content . ';';
+        $fs->dumpFile('var/found.php', $content);
     }
 }
