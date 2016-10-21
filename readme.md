@@ -1,4 +1,3 @@
 Download all images from tumblr archive via php
-> Usage:
-> - composer install
-> - php index.php extract http://*****.tumblr.com/
+> 1. composer install
+> 2. php index.php extract http://*****.tumblr.com/
