@@ -96,8 +96,12 @@ class ExtractPhotos extends Command
                             preg_match('#tumblr_[A-Za-z0-9]*_[0-9]*\.[a-z]*#', $finalPhoto, $photoName);
                             $photoName = reset($photoName);
 
-                            $resource = fopen($destination . '/' . $photoName, 'w+');
-                            $http->request('GET', $finalPhoto, ['sink' => $resource]);
+                            /*  Brokes image, fix if you want;
+                                $resource = fopen($destination . '/' . $photoName, 'w');
+                                $download = $http->request('GET', $finalPhoto, ['sink' => $resource]);
+                            */
+
+                            file_put_contents($destination . '/' . $photoName, file_get_contents('http://' . $finalPhoto));
                         }
                     }
                 }
