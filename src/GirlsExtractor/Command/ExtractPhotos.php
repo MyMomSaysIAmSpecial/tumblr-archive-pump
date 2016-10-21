@@ -123,6 +123,11 @@ class ExtractPhotos extends Command
                             if ($result) {
                                 $io->success('Downloaded ' . $photoName);
                                 $fetched[$post] = $photoName;
+
+                                # Log is needed after each downloaded image otherwise exception will fuckup whole work done
+                                $content = var_export($fetched, true);
+                                $content = '<?php return ' . $content . ';';
+                                $fs->dumpFile($folder . '/fetched.php', $content);
                             } else {
                                 $io->error('Failed to download ' . $photoName);
                             }
@@ -133,8 +138,5 @@ class ExtractPhotos extends Command
         }
 
         $io->success('Finished.');
-        $content = var_export($fetched, true);
-        $content = '<?php return ' . $content . ';';
-        $fs->dumpFile($folder . '/fetched.php', $content);
     }
 }
