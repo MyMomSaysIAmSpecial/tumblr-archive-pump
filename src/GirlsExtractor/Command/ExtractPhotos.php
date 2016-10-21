@@ -103,7 +103,7 @@ class ExtractPhotos extends Command
                             preg_match('#tumblr_[A-Za-z0-9]*_[0-9]*\.[a-z]*#', $finalPhoto, $photoName);
                             $photoName = reset($photoName);
 
-                            #  Brokes image, fix if you want;
+                            #  Brokes image sometime, fix if you want;
                             #  $resource = fopen($destination . '/' . $photoName, 'w');
                             #  $download = $http->request('GET', $finalPhoto, ['sink' => $resource]);
 
@@ -111,7 +111,7 @@ class ExtractPhotos extends Command
 
                             if($result) {
                                 $io->success('Downloaded ' . $photoName);
-                                $fetched[] = $post;
+                                $fetched[$post] = $photoName;
                             } else {
                                 $io->error('Failed to download ' . $photoName);
                             }
