@@ -1,2 +1,2 @@
 Pumps images from tumblr archive
-> **Usage:** php index.php extract http://fedorshmidt.tumblr.com/
+> **Usage:** php index.php extract http://*****.tumblr.com/
