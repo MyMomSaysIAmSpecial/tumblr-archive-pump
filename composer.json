@@ -1,0 +1,18 @@
+{
+  "autoload": {
+    "psr-4": {
+      "": "src/"
+    }
+  },
+  "require":{
+    "php":">=5.6.0",
+
+    "symfony/config": "*",
+    "symfony/console": "*",
+    "symfony/filesystem": "*",
+    "symfony/dependency-injection": "*",
+
+    "guzzlehttp/guzzle": "*"
+  },
+  "prefer-stable": true
+}
