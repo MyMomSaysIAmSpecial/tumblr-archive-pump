@@ -29,7 +29,7 @@ class ExtractPhotos extends Command
             ->addArgument(
                 'url',
                 InputArgument::REQUIRED,
-                'Please set archive url'
+                'Please enter blog url'
             );
     }
 
@@ -109,7 +109,7 @@ class ExtractPhotos extends Command
                             preg_match('#tumblr_[A-Za-z0-9]*_[0-9]*\.[a-z]*#', $finalPhoto, $photoName);
                             $photoName = reset($photoName);
 
-                            #  Brokes image sometime, fix if you want;
+                            #  Breaks downloaded image sometimes, fix if you want;
                             #  $resource = fopen($destination . '/' . $photoName, 'w');
                             #  $download = $http->request('GET', $finalPhoto, ['sink' => $resource]);
 
@@ -121,7 +121,8 @@ class ExtractPhotos extends Command
                                 $io->success('Downloaded ' . $photoName);
                                 $fetched[$post] = $photoName;
 
-                                # Log is needed after each downloaded image otherwise exception will fuckup whole work done
+                                # Log is necessary after each downloaded image,
+                                # otherwise exception will fuckup whole work done;
                                 $content = var_export($fetched, true);
                                 $content = '<?php return ' . $content . ';';
                                 $fs->dumpFile($folder . '/fetched.php', $content);
