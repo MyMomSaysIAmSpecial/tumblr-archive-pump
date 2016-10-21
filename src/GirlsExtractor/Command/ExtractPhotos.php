@@ -52,16 +52,20 @@ class ExtractPhotos extends Command
         $url = rtrim($url, '/');
         $archive = $url . '/archive';
 
-        $folder = __DIR__ . '/../../../var/';
-        $destination = $folder . preg_replace("/[^A-Za-z]/", null, $url);
+        $folder = 'var/' . preg_replace("/[^A-Za-z]/", null, $url);
 
-        if (!is_dir($destination)) {
-            mkdir($destination, 0755, true);
+        if (!$fs->exists($folder)) {
+            $fs->mkdir($folder);
         }
 
         $fetched = [];
+        if ($fs->exists($folder . '/fetched.php')) {
+            $fetched = require_once $folder . '/fetched.php';
+            $io->note('Already fetched list loaded.');
+        }
+
         $continue = true;
-        while($continue) {
+        while ($continue) {
             $response = $http->get($archive);
             if ($response->getStatusCode() == 200) {
                 $source = $response->getBody();
@@ -69,7 +73,7 @@ class ExtractPhotos extends Command
                 preg_match('#id="next_page_link" href="(.*?)"#', $source, $link);
                 $link = reset(array_reverse($link));
 
-                if(empty($link)) {
+                if (empty($link)) {
                     $continue = false;
                 }
 
@@ -77,6 +81,11 @@ class ExtractPhotos extends Command
 
                 preg_match_all('#\/post\/[0-9]*#', $source, $posts);
                 foreach (reset($posts) as $post) {
+                    if (!empty($fetched[$post])) {
+                        $io->note('Post already checked, skipping');
+                        continue;
+                    }
+
                     $response = $http->get($url . $post);
                     if ($response->getStatusCode() == 200) {
                         $source = $response->getBody();
@@ -107,9 +116,11 @@ class ExtractPhotos extends Command
                             #  $resource = fopen($destination . '/' . $photoName, 'w');
                             #  $download = $http->request('GET', $finalPhoto, ['sink' => $resource]);
 
-                            $result = file_put_contents($destination . '/' . $photoName, file_get_contents('http://' . $finalPhoto));
+                            $result = true;
+                            $content = file_get_contents('http://' . $finalPhoto);
+                            $fs->dumpFile($folder . '/' . $photoName, $content);
 
-                            if($result) {
+                            if ($result) {
                                 $io->success('Downloaded ' . $photoName);
                                 $fetched[$post] = $photoName;
                             } else {
@@ -121,8 +132,9 @@ class ExtractPhotos extends Command
             }
         }
 
+        $io->success('Finished.');
         $content = var_export($fetched, true);
         $content = '<?php return ' . $content . ';';
-        $fs->dumpFile('var/found.php', $content);
+        $fs->dumpFile($folder . '/fetched.php', $content);
     }
 }
