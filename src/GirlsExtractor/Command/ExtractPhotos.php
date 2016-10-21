@@ -2,10 +2,7 @@
 
 namespace GirlsExtractor\Command;
 
-use Illuminate\Database\Capsule\Manager;
-use Symfony\Component\Config\FileLocator;
 use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Helper\FormatterHelper;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
