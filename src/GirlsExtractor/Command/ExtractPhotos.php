@@ -79,7 +79,7 @@ class ExtractPhotos extends Command
                 preg_match_all('#\/post\/[0-9]*#', $source, $posts);
                 foreach (reset($posts) as $post) {
                     if (!empty($fetched[$post])) {
-                        $io->note('Post already checked, skipping');
+                        $io->note('Post ' . $post . ' already checked, skipping');
                         continue;
                     }
 
