@@ -8,6 +8,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\DependencyInjection\Parameter;
 use Symfony\Component\Filesystem\Filesystem;
 
 
@@ -80,11 +81,18 @@ class ExtractPhotos extends Command
                 preg_match_all('#\/post\/[0-9]*#', $source, $posts);
                 foreach (reset($posts) as $post) {
                     if (!empty($fetched[$post])) {
-                        $io->note('Post ' . $post . ' already checked, skipping');
+                        $io->note('Post ' . $post . ' already fetched, skipping');
                         continue;
                     }
 
-                    $response = $http->get($url . $post);
+                    try {
+                        $response = $http->get($url . $post);
+                        sleep(1);
+                    } catch (\Exception $e) {
+                        $io->error('Skipped ' . $post);
+                        continue;
+                    }
+
                     if ($response->getStatusCode() == 200) {
                         $source = $response->getBody();
 
@@ -111,16 +119,29 @@ class ExtractPhotos extends Command
                             preg_match('#tumblr_[A-Za-z0-9]*_[0-9]*\.[a-z]*#', $finalPhoto, $photoName);
                             $photoName = reset($photoName);
 
-                            #  Breaks downloaded image sometimes, fix if you want;
-                            #  $resource = fopen($destination . '/' . $photoName, 'w');
-                            #  $download = $http->request('GET', $finalPhoto, ['sink' => $resource]);
-
                             $result = true;
-                            $content = file_get_contents('http://' . $finalPhoto);
-                            $fs->dumpFile($folder . '/' . $photoName, $content);
+
+                            try {
+                                $response = $http->get('http://' . $finalPhoto);
+                            } catch (\Exception $e) {
+                                $io->error('Skipped ' . $post);
+                                continue;
+                            }
+
+                            try {
+                                $fs->dumpFile(
+                                    $folder . '/' . $photoName,
+                                    $response
+                                        ->getBody()
+                                        ->getContents()
+                                );
+                            } catch (\Exception $e) {
+                                $io->error('Skipped ' . $post . ', ' . $e->getMessage());
+                                continue;
+                            }
 
                             if ($result) {
-                                $io->success('Downloaded ' . $photoName);
+                                $io->success('Downloaded ' . $post);
                                 $fetched[$post] = $photoName;
 
                                 # Log is necessary after each downloaded image,
@@ -129,7 +150,7 @@ class ExtractPhotos extends Command
                                 $content = '<?php return ' . $content . ';';
                                 $fs->dumpFile($folder . '/fetched.php', $content);
                             } else {
-                                $io->error('Failed to download ' . $photoName);
+                                $io->error('Failed to download ' . $post);
                             }
                         }
                     }
