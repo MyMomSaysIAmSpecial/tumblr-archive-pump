@@ -87,7 +87,7 @@ class ExtractPhotos extends Command
 
                     try {
                         $response = $http->get($url . $post);
-                        sleep(1);
+                        sleep(1); # Not necessary
                     } catch (\Exception $e) {
                         $io->error('Skipped ' . $post);
                         continue;
