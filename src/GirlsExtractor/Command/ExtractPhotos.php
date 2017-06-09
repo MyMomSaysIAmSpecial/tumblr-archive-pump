@@ -68,7 +68,8 @@ class ExtractPhotos extends Command
                 $source = $response->getBody();
 
                 preg_match('#id="next_page_link" href="(.*?)"#', $source, $link);
-                $link = reset(array_reverse($link));
+                $link = array_reverse($link);
+                $link = reset($link);
 
                 if (empty($link)) {
                     $continue = false;
@@ -97,7 +98,8 @@ class ExtractPhotos extends Command
                             $grouped = [];
                             foreach ($photos as $photo) {
                                 preg_match('#_([0-9]{1,4})\.[a-z]*#', $photo, $matches);
-                                $resolution = reset(array_reverse($matches));
+                                $matches = array_reverse($matches);
+                                $resolution = reset($matches);
                                 $grouped[$resolution] = $photo;
                             }
 
